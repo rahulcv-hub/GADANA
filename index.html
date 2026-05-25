@@ -498,6 +498,7 @@
 
 <div class="game-wrap">
   <div class="header-controls">
+    <button class="theme-toggle-btn" id="musicToggle" onclick="toggleMusic()" title="Toggle Background Music" style="opacity: 0.5; margin-right: auto;">♫</button>
     <button class="lang-toggle-btn" id="langToggle" onclick="toggleLanguage()">മലയാളം</button>
     <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Switch View Mode">☀︎</button>
   </div>
@@ -551,6 +552,23 @@
 
 <script>
 // --- AUDIO SETUP ---
+const bgMusic = new Audio('Beside_the_Wooden_Well.mp3');
+bgMusic.loop = true;
+bgMusic.volume = 0.3;
+let musicEnabled = false;
+
+function toggleMusic() {
+  const btn = document.getElementById('musicToggle');
+  musicEnabled = !musicEnabled;
+  if (musicEnabled) {
+    bgMusic.play().catch(e => { console.log('Audio wait for user interaction'); });
+    btn.style.opacity = '1';
+  } else {
+    bgMusic.pause();
+    btn.style.opacity = '0.5';
+  }
+}
+
 const tileSound1 = new Audio('freesound-community-11-carboard-box-folding-99720_S8HEVocg.mp3');
 const tileSound2 = new Audio('freesound-community-11-carboard-box-folding-99720_9MQfpIBd.mp3');
 const winSound = new Audio('mrstokes302-success-videogame-sfx-mrstokes302-423626_ykhT3sNw.mp3');
