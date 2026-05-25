@@ -328,6 +328,38 @@
       z-index: 3;
       transition: color 0.3s ease, background 0.3s ease;
     }
+
+    /* --- NEW HINT ANIMATIONS & ARROW STYLES --- */
+    .hint-arrow {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.8);
+      z-index: 10;
+      pointer-events: none;
+      animation: pulseArrow 1s infinite;
+    }
+    
+    @keyframes pulseArrow {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    .ghost-move-up { animation: ghostUp 1s ease; }
+    .ghost-move-down { animation: ghostDown 1s ease; }
+    .ghost-move-left { animation: ghostLeft 1s ease; }
+    .ghost-move-right { animation: ghostRight 1s ease; }
+
+    @keyframes ghostUp { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20%); } }
+    @keyframes ghostDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(20%); } }
+    @keyframes ghostLeft { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-20%); } }
+    @keyframes ghostRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(20%); } }
+    /* ------------------------------------------ */
+
     .controls {
       display: flex;
       gap: 14px;
@@ -551,17 +583,16 @@ let currentTheme = 'light';
 let isGameWon = false;
 let currentLang = 'en'; 
 
-// AI State Tracking
 let lastMovedTileValue = -1; 
-
 let currentLevelIndex = 0;
+
 const gameLevels = [
   { names: { en: "Level 1: The Village Square", ml: "ഘട്ടം 1: ഗ്രാമത്തിലെ കവല" }, lineart: "Gemini_Generated_Image_hebcjshebcjshebc (1).png", shaded: "Gemini_Generated_Image_f38jokf38jokf38j.png" },
   { names: { en: "Level 2: Wheat & Oats Tavern", ml: "ഘട്ടം 2: സത്രത്തിലെ കാഴ്ച" }, lineart: "Gemini_Generated_Image_khuflqkhuflqkhuf.png", shaded: "Gemini_Generated_Image_54xhs054xhs054xh.png" },
-  { names: { en: "Level 3: St. Michael's Parish", ml: "ഘട്ടം 3: സെന്റ് മൈക്കിൾസ് പള്ളി" }, lineart: "Gemini_Generated_Image_378kve378kve378k (1).png", shaded: "Gemini_Generated_Image_mlqabrmlqabrmlqa.png" }
+  { names: { en: "Level 3: St. Michael's Parish", ml: "ഘട്ടം 3: സെന്റ് മൈക്കിൾസ് പള്ളി" }, lineart: "Gemini_Generated_Image_378kve378kve378k (1).png", shaded: "Gemini_Generated_Image_mlqabrmlqabrmlqa.png" },
+  { names: { en: "Level 4: The Barber-Surgeon's Shop", ml: "ഘട്ടം 4: ബാർബർ-സർജന്റെ കട" }, lineart: "Gemini_Generated_Image_dkgl78dkgl78dkgl.png", shaded: "Gemini_Generated_Image_rzic0frzic0frzic.png" }
 ];
 
-// --- FUNNY & SARCASTIC LOCALIZATIONS ---
 const localizations = {
   en: {
     title: "Fragmenta",
@@ -569,13 +600,12 @@ const localizations = {
     srInstruction: "Sliding puzzle game with illustrated tiles. Arrange tiles to complete the illustration.",
     easy: "Easy", medium: "Medium", hard: "Hard", reset: "Rage Quit (Reset)", hint: "Beg for a Hint", themeTip: "Switch View Mode",
     startComment: "Go ahead. The puzzle isn't going to solve itself.",
-    hintComment: "I highlighted the tile for you. Don't let me down.",
+    hintComment: "Follow the arrow. Don't let me down.",
     winHeaderStandard: "Finally!", winHeaderBrilliant: "Wait, Are You a Genius?",
     winCommentStandard: "You actually did it! I was starting to lose hope. 🎉",
     winCommentBrilliant: "Okay, color me impressed. That was suspiciously fast. ⚡🏆",
     nextLevel: "Next Level (If you dare)", restartJourney: "Do it all over again", langBtn: "മലയാളം",
     
-    // AI Analysis Banks
     improving: [
       "Oh, look at Einstein over here. 🧠", 
       "Accidental genius or calculated move? We'll never know. 🎲", 
@@ -612,7 +642,7 @@ const localizations = {
     title: "ഘടന", subtitle: "ഈ കഷണങ്ങൾ ചേർത്ത് ചിത്രം പൂർത്തിയാക്കൂ", srInstruction: "ചിത്രം ക്രമീകരിക്കുന്ന പസിൽ ഗെയിം.",
     easy: "എളുപ്പം", medium: "ഇടത്തരം", hard: "കഠിനം", reset: "വീണ്ടും തുടങ്ങുക", hint: "സഹായം വേണോ?", themeTip: "തീം മാറ്റുക",
     startComment: "തുടങ്ങിക്കോ. നോക്കി നിന്നാൽ ഇത് തീരില്ല.",
-    hintComment: "ദേ തിളങ്ങുന്ന കഷ്ണം കണ്ടോ? അതെടുത്ത് വെക്ക്.",
+    hintComment: "അമ്പ് കാണിക്കുന്ന വഴിയിലേക്ക് നീക്കുക.",
     winHeaderStandard: "ഒടുവിൽ കഴിഞ്ഞു!", winHeaderBrilliant: "അതിഗംഭീരം!",
     winCommentStandard: "സമ്മതിച്ചു! നീ ഇത് തീർക്കുമെന്ന് ഞാൻ കരുതിയില്ല. 🎉",
     winCommentBrilliant: "അടിപൊളി! ഇത്ര വേഗം തീർക്കുമെന്ന് പ്രതീക്ഷിച്ചില്ല. ⚡🏆",
@@ -715,14 +745,11 @@ function getNeighbors(pos) {
 function getEmptyPos() { return tiles.indexOf(TILE_COUNT - 1); }
 function canMove(pos) { return getNeighbors(getEmptyPos()).includes(pos); }
 
-// --- AI HEURISTIC FUNCTION ---
-// Calculates how "messy" the board is based on Manhattan Distance. 
-// A score of 0 means the puzzle is solved.
 function calculateBoardScore() {
   let score = 0;
   for (let i = 0; i < TILE_COUNT; i++) {
     let val = tiles[i];
-    if (val === TILE_COUNT - 1) continue; // Ignore empty tile
+    if (val === TILE_COUNT - 1) continue; 
     let currentX = i % SIZE;
     let currentY = Math.floor(i / SIZE);
     let targetX = val % SIZE;
@@ -771,17 +798,14 @@ function moveTile(pos) {
   playMoveSound();
   if (!timerStarted) startTimer();
   
-  // AI PRE-CALCULATION
   const preMoveScore = calculateBoardScore();
   const emptyPos = getEmptyPos();
   const movedTileValue = tiles[pos];
 
-  // EXECUTE MOVE
   [tiles[emptyPos], tiles[pos]] = [tiles[pos], tiles[emptyPos]];
   moves++;
   document.getElementById('moves').textContent = moves;
   
-  // AI POST-CALCULATION & COMMENT LOGIC
   if (checkWin()) {
     handleWin();
   } else {
@@ -789,13 +813,13 @@ function moveTile(pos) {
     let commentBank = null;
 
     if (moves > moveThresholds[difficulty] && Math.random() < 0.2) {
-      commentBank = pack.struggle; // Randomly roast them if they are taking way too long
+      commentBank = pack.struggle; 
     } else if (movedTileValue === lastMovedTileValue) {
-      commentBank = pack.undoing; // They just moved the exact piece they moved last time
+      commentBank = pack.undoing; 
     } else if (postMoveScore < preMoveScore) {
-      if (Math.random() < 0.35) commentBank = pack.improving; // Getting closer! (Show 35% of the time so it's not spammy)
+      if (Math.random() < 0.35) commentBank = pack.improving; 
     } else if (postMoveScore > preMoveScore) {
-      if (Math.random() < 0.4) commentBank = pack.worsening; // Getting further away!
+      if (Math.random() < 0.4) commentBank = pack.worsening; 
     }
 
     if (commentBank) {
@@ -946,9 +970,11 @@ function renderBoard() {
   });
 }
 
+// --- UPDATED HINT LOGIC (GHOST MOVE & ARROW) ---
 function showHint() {
   if (isGameWon) return;
-  const empty = getEmptyPos(); const neighbors = getNeighbors(empty);
+  const empty = getEmptyPos(); 
+  const neighbors = getNeighbors(empty);
   let bestNeighbor = neighbors[0], bestScore = Infinity;
   
   neighbors.forEach(n => {
@@ -958,11 +984,40 @@ function showHint() {
   });
 
   const hintTile = document.getElementById('board').querySelectorAll('.tile')[bestNeighbor];
+  
   if (hintTile) {
-    hintTile.style.outline = `3px solid ${currentTheme === 'light' ? '#1a1a1a' : '#ddcd95'}`; hintTile.style.outlineOffset = '-3px';
-    setTimeout(() => { hintTile.style.outline = ''; hintTile.style.outlineOffset = ''; }, 1000);
+    let arrowChar = '';
+    let animClass = '';
+    
+    // Determine the direction from the tile to the empty space
+    if (bestNeighbor === empty - 1) { 
+      arrowChar = '▶'; animClass = 'ghost-move-right'; 
+    } else if (bestNeighbor === empty + 1) { 
+      arrowChar = '◀'; animClass = 'ghost-move-left'; 
+    } else if (bestNeighbor === empty - SIZE) { 
+      arrowChar = '▼'; animClass = 'ghost-move-down'; 
+    } else if (bestNeighbor === empty + SIZE) { 
+      arrowChar = '▲'; animClass = 'ghost-move-up'; 
+    }
+
+    // Append the arrow text element
+    const arrow = document.createElement('div');
+    arrow.className = 'hint-arrow';
+    arrow.textContent = arrowChar;
+    hintTile.appendChild(arrow);
+    
+    // Add the CSS animation class
+    hintTile.classList.add(animClass);
+
+    // Clean up after the animation completes (1 second)
+    setTimeout(() => {
+      if(hintTile.contains(arrow)) hintTile.removeChild(arrow);
+      hintTile.classList.remove(animClass);
+    }, 1000);
   }
-  showDynamicComment(localizations[currentLang].hintComment, true); resetIdleTimer();
+  
+  showDynamicComment(localizations[currentLang].hintComment, true); 
+  resetIdleTimer();
 }
 
 function setDifficulty(btn, d) {
