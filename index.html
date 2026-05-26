@@ -343,17 +343,24 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
-      color: rgba(255, 255, 255, 0.95);
-      text-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.8);
       z-index: 10;
       pointer-events: none;
-      animation: pulseArrow 1s infinite;
+      animation: pulseArrow 1s ease-in-out infinite;
     }
-    
+
+    .hint-arrow svg {
+      width: 36px;
+      height: 36px;
+      filter: drop-shadow(2px 2px 0px #555555);
+    }
+
+    [data-theme="dark"] .hint-arrow svg {
+      filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.8));
+    }
+
     @keyframes pulseArrow {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
+      0%, 100% { opacity: 0.5; transform: scale(0.92); }
+      50% { opacity: 1; transform: scale(1); }
     }
 
     .ghost-move-up { animation: ghostUp 1s ease; }
@@ -1173,15 +1180,18 @@ function showHint() {
       if (!hintTile) return;
 
       // Direction: the tile at tilePos slides into emptyPos
-      let arrowChar = '', animClass = '';
-      if (tilePos === emptyPos - 1)      { arrowChar = '▶'; animClass = 'ghost-move-right'; }
-      else if (tilePos === emptyPos + 1) { arrowChar = '◀'; animClass = 'ghost-move-left'; }
-      else if (tilePos === emptyPos - SIZE) { arrowChar = '▼'; animClass = 'ghost-move-down'; }
-      else if (tilePos === emptyPos + SIZE) { arrowChar = '▲'; animClass = 'ghost-move-up'; }
+      let rotateDeg = 0, animClass = '';
+      if (tilePos === emptyPos - 1)        { rotateDeg = 90;  animClass = 'ghost-move-right'; }
+      else if (tilePos === emptyPos + 1)   { rotateDeg = -90; animClass = 'ghost-move-left'; }
+      else if (tilePos === emptyPos - SIZE) { rotateDeg = 180; animClass = 'ghost-move-down'; }
+      else if (tilePos === emptyPos + SIZE) { rotateDeg = 0;   animClass = 'ghost-move-up'; }
 
       const arrow = document.createElement('div');
       arrow.className = 'hint-arrow';
-      arrow.textContent = arrowChar;
+      arrow.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(${rotateDeg}deg)">
+        <line x1="12" y1="20" x2="12" y2="5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        <polyline points="6,11 12,5 18,11" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
       hintTile.appendChild(arrow);
       hintTile.classList.add(animClass);
 
