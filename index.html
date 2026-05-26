@@ -351,16 +351,26 @@
     .hint-arrow svg {
       width: 36px;
       height: 36px;
-      filter: drop-shadow(2px 2px 0px #555555);
+      filter: drop-shadow(2px 2px 0px rgba(245,241,235,0.9));
     }
 
     [data-theme="dark"] .hint-arrow svg {
-      filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.8));
+      filter: drop-shadow(2px 2px 0px rgba(28,28,28,0.9));
     }
 
     @keyframes pulseArrow {
-      0%, 100% { opacity: 0.5; transform: scale(0.92); }
+      0%, 100% { opacity: 0.6; transform: scale(0.94); }
       50% { opacity: 1; transform: scale(1); }
+    }
+
+    .board.hint-active .tile:not(.hint-target) {
+      opacity: 0.45;
+      transition: opacity 0.25s ease;
+    }
+
+    .tile.hint-target {
+      opacity: 1 !important;
+      transition: opacity 0.25s ease;
     }
 
     .ghost-move-up { animation: ghostUp 1s ease; }
@@ -1186,18 +1196,26 @@ function showHint() {
       else if (tilePos === emptyPos - SIZE) { rotateDeg = 180; animClass = 'ghost-move-down'; }
       else if (tilePos === emptyPos + SIZE) { rotateDeg = 0;   animClass = 'ghost-move-up'; }
 
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const arrowStroke = isDark ? '#ddcd95' : '#1a1a1a';
+
       const arrow = document.createElement('div');
       arrow.className = 'hint-arrow';
       arrow.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(${rotateDeg}deg)">
-        <line x1="12" y1="20" x2="12" y2="5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-        <polyline points="6,11 12,5 18,11" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="12" y1="20" x2="12" y2="5" stroke="${arrowStroke}" stroke-width="1.8" stroke-linecap="round"/>
+        <polyline points="6,11 12,5 18,11" fill="none" stroke="${arrowStroke}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>`;
+
+      const board = document.getElementById('board');
+      board.classList.add('hint-active');
+      hintTile.classList.add('hint-target');
       hintTile.appendChild(arrow);
       hintTile.classList.add(animClass);
 
       setTimeout(() => {
         if (hintTile.contains(arrow)) hintTile.removeChild(arrow);
-        hintTile.classList.remove(animClass);
+        hintTile.classList.remove(animClass, 'hint-target');
+        board.classList.remove('hint-active');
       }, 950);
     }, idx * 1100);
   });
