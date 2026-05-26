@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fragmenta - Sliding Puzzle</title>
+  <title>GADANA - Sliding Puzzle</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Gayathri:wght@400;700&family=Playfair+Display:wght@400;700;900&family=Crimson+Text:ital@0;1&display=swap');
+    /* Imported Albert Sans and Manjari along with the existing fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;700&family=Gayathri:wght@400;700&family=Manjari:wght@700&family=Playfair+Display:wght@400;700;900&family=Crimson+Text:ital@0;1&display=swap');
 
-    /* CUSTOM FONT DEFINITION - Update the path below */
+    /* CUSTOM FONT DEFINITION */
     @font-face {
       font-family: 'ML_TT_Chithira';
       src: url('path/to/ML_TT_Chithira.ttf') format('truetype');
@@ -127,13 +128,20 @@
     }
     
     .game-title {
-      font-family: 'ML_TT_Chithira', 'Playfair Display', Georgia, serif;
-      font-size: 32px;
+      font-family: 'Albert Sans', sans-serif;
       font-weight: 700;
+      font-size: 32px;
       letter-spacing: 0.05em;
       margin: 0 0 2px;
       color: var(--color-text-primary);
+      transition: font-family 0.15s ease;
     }
+    /* Changes title font family to Manjari Bold when Malayalam layout is triggered */
+    .game-title.lang-ml {
+      font-family: 'Manjari', sans-serif;
+      font-weight: 700;
+    }
+
     [data-theme="dark"] .game-title {
       color: var(--color-text-tertiary);
     }
@@ -150,7 +158,7 @@
       letter-spacing: 0.04em;
       text-transform: uppercase;
       font-weight: 700;
-      color: var(--color-text-tertiary);
+      color: var(--text-tertiary);
       margin-bottom: 1.25rem;
     }
     [data-theme="light"] .level-indicator {
@@ -329,7 +337,6 @@
       transition: color 0.3s ease, background 0.3s ease;
     }
 
-    /* --- NEW HINT ANIMATIONS & ARROW STYLES --- */
     .hint-arrow {
       position: absolute;
       inset: 0;
@@ -358,7 +365,6 @@
     @keyframes ghostDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(20%); } }
     @keyframes ghostLeft { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-20%); } }
     @keyframes ghostRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(20%); } }
-    /* ------------------------------------------ */
 
     .controls {
       display: flex;
@@ -504,7 +510,7 @@
   </div>
 
   <h1 class="sr-only" id="srInstruction">Sliding puzzle game with illustrated tiles. Arrange tiles to complete the illustration.</h1>
-  <p class="game-title" id="mainTitle">Fragmenta</p>
+  <p class="game-title" id="mainTitle">GADANA</p>
   <p class="game-subtitle" id="mainSubtitle">Reassemble the shattered illustration</p>
   <p class="level-indicator" id="levelIndicator">Level 1: The Village Square</p>
 
@@ -544,7 +550,7 @@
   </div>
 
   <div class="controls">
-    <button class="btn" id="resetBtn" onclick="newGame()">Reset Level</button>
+    <button class="btn" id="resetBtn" onclick="newGame()">Reset</button>
     <button class="btn" id="hintBtn" onclick="showHint()">Hint</button>
   </div>
   <p class="hint-text" id="hintText">Click tiles adjacent to the empty space to slide them.</p>
@@ -613,16 +619,23 @@ const gameLevels = [
 
 const localizations = {
   en: {
-    title: "Fragmenta",
+    title: "GADANA",
     subtitle: "Reassemble the shattered illustration",
     srInstruction: "Sliding puzzle game with illustrated tiles. Arrange tiles to complete the illustration.",
-    easy: "Easy", medium: "Medium", hard: "Hard", reset: "Rage Quit (Reset)", hint: "Beg for a Hint", themeTip: "Switch View Mode",
+    easy: "Easy", medium: "Medium", hard: "Hard", reset: "Reset", hint: "Hint", themeTip: "Switch View Mode",
     startComment: "Go ahead. The puzzle isn't going to solve itself.",
     hintComment: "Follow the arrow. Don't let me down.",
-    winHeaderStandard: "Finally!", winHeaderBrilliant: "Wait, Are You a Genius?",
-    winCommentStandard: "You actually did it! I was starting to lose hope. 🎉",
-    winCommentBrilliant: "Okay, color me impressed. That was suspiciously fast. ⚡🏆",
-    nextLevel: "Next Level (If you dare)", restartJourney: "Do it all over again", langBtn: "മലയാളം",
+    
+    /* Updated Difficulty-Based Winning Text */
+    winHeaderEasy: "Finally!", 
+    winHeaderMedium: "Absolute genius! 👏🏻",
+    winHeaderHard: "A victory achieved by very few! 🔥💪",
+    
+    winCommentEasy: "You actually did it! I was starting to lose hope. 🎉",
+    winCommentMedium: "Your effort paid off wonderfully! 🌟",
+    winCommentHard: "An elite display of puzzle-solving mastery! 🏆",
+
+    nextLevel: "Next Level", restartJourney: "Restart Journey", langBtn: "മലയാളം",
     
     improving: [
       "Oh, look at Einstein over here. 🧠", 
@@ -661,9 +674,16 @@ const localizations = {
     easy: "എളുപ്പം", medium: "ഇടത്തരം", hard: "കഠിനം", reset: "വീണ്ടും തുടങ്ങുക", hint: "സഹായം വേണോ?", themeTip: "തീം മാറ്റുക",
     startComment: "തുടങ്ങിക്കോ. നോക്കി നിന്നാൽ ഇത് തീരില്ല.",
     hintComment: "അമ്പ് കാണിക്കുന്ന വഴിയിലേക്ക് നീക്കുക.",
-    winHeaderStandard: "ഒടുവിൽ കഴിഞ്ഞു!", winHeaderBrilliant: "അതിഗംഭീരം!",
-    winCommentStandard: "സമ്മതിച്ചു! നീ ഇത് തീർക്കുമെന്ന് ഞാൻ കരുതിയില്ല. 🎉",
-    winCommentBrilliant: "അടിപൊളി! ഇത്ര വേഗം തീർക്കുമെന്ന് പ്രതീക്ഷിച്ചില്ല. ⚡🏆",
+    
+    /* Updated Difficulty-Based Winning Text */
+    winHeaderEasy: "ഒടുവിൽ കഴിഞ്ഞു!", 
+    winHeaderMedium: "അതുല്യ പ്രതിഭ തന്നെ 👏🏻",
+    winHeaderHard: "ഇതുവരെ വളരെ കുറച്ച ആളുകൾ മാത്രം കൈവരിച്ച വിജയം 🔥💪",
+    
+    winCommentEasy: "സമ്മതിച്ചു! നീ ഇത് തീർക്കുമെന്ന് ഞാൻ കരുതിയില്ല. 🎉",
+    winCommentMedium: "ഗംഭീരമായ പ്രകടനം! 🌟",
+    winCommentHard: "അതിഗംഭീരമായ ഒരു നേട്ടം! 🏆",
+
     nextLevel: "അടുത്ത ഘട്ടം", restartJourney: "ആദ്യമുതൽ തുടങ്ങുക", langBtn: "English",
     
     improving: [
@@ -702,9 +722,10 @@ const themeConfetti = { light: ['#1a1a1a', '#ddcd95', '#c8c0b0', '#555555', '#a6
 function toggleLanguage() {
   currentLang = currentLang === 'en' ? 'ml' : 'en';
   const pack = localizations[currentLang];
+  const titleEl = document.getElementById('mainTitle');
   
   document.getElementById('langToggle').textContent = pack.langBtn;
-  document.getElementById('mainTitle').textContent = pack.title;
+  titleEl.textContent = pack.title;
   document.getElementById('mainSubtitle').textContent = pack.subtitle;
   document.getElementById('srInstruction').textContent = pack.srInstruction;
   document.getElementById('diffEasy').textContent = pack.easy;
@@ -715,9 +736,23 @@ function toggleLanguage() {
   document.getElementById('themeToggle').setAttribute('title', pack.themeTip);
   document.getElementById('levelIndicator').textContent = gameLevels[currentLevelIndex].names[currentLang];
   
+  if (currentLang === 'ml') {
+    titleEl.classList.add('lang-ml');
+  } else {
+    titleEl.classList.remove('lang-ml');
+  }
+
   if (isGameWon) {
     const actionBtn = document.getElementById('winActionButton');
-    document.getElementById('winHeader').textContent = moves <= brillianceThresholds[difficulty] ? pack.winHeaderBrilliant : pack.winHeaderStandard;
+    
+    if (difficulty === 'hard') {
+      document.getElementById('winHeader').textContent = pack.winHeaderHard;
+    } else if (difficulty === 'medium') {
+      document.getElementById('winHeader').textContent = pack.winHeaderMedium;
+    } else {
+      document.getElementById('winHeader').textContent = pack.winHeaderEasy;
+    }
+
     actionBtn.textContent = currentLevelIndex < gameLevels.length - 1 ? pack.nextLevel : pack.restartJourney;
   } else {
     document.getElementById('hintText').textContent = pack.startComment;
@@ -780,7 +815,6 @@ function calculateBoardScore() {
 let idleTimeout = null;
 let commentFadeTimeout = null;
 const moveThresholds = { easy: 60, medium: 250, hard: 600 };
-const brillianceThresholds = { easy: 25, medium: 150, hard: 400 };
 
 function showDynamicComment(text, autoFade = true) {
   const el = document.getElementById('hintText');
@@ -865,12 +899,16 @@ function handleWin() {
   
   const actionBtn = document.getElementById('winActionButton');
   const pack = localizations[currentLang];
-  if (moves <= brillianceThresholds[difficulty]) {
-    document.getElementById('winHeader').textContent = pack.winHeaderBrilliant;
-    showDynamicComment(pack.winCommentBrilliant, false);
+  
+  if (difficulty === 'hard') {
+    document.getElementById('winHeader').textContent = pack.winHeaderHard;
+    showDynamicComment(pack.winCommentHard, false);
+  } else if (difficulty === 'medium') {
+    document.getElementById('winHeader').textContent = pack.winHeaderMedium;
+    showDynamicComment(pack.winCommentMedium, false);
   } else {
-    document.getElementById('winHeader').textContent = pack.winHeaderStandard;
-    showDynamicComment(pack.winCommentStandard, false);
+    document.getElementById('winHeader').textContent = pack.winHeaderEasy;
+    showDynamicComment(pack.winCommentEasy, false);
   }
   
   actionBtn.textContent = currentLevelIndex < gameLevels.length - 1 ? pack.nextLevel : pack.restartJourney;
@@ -988,7 +1026,6 @@ function renderBoard() {
   });
 }
 
-// --- UPDATED HINT LOGIC (GHOST MOVE & ARROW) ---
 function showHint() {
   if (isGameWon) return;
   const empty = getEmptyPos(); 
@@ -1007,7 +1044,6 @@ function showHint() {
     let arrowChar = '';
     let animClass = '';
     
-    // Determine the direction from the tile to the empty space
     if (bestNeighbor === empty - 1) { 
       arrowChar = '▶'; animClass = 'ghost-move-right'; 
     } else if (bestNeighbor === empty + 1) { 
@@ -1018,16 +1054,13 @@ function showHint() {
       arrowChar = '▲'; animClass = 'ghost-move-up'; 
     }
 
-    // Append the arrow text element
     const arrow = document.createElement('div');
     arrow.className = 'hint-arrow';
     arrow.textContent = arrowChar;
     hintTile.appendChild(arrow);
     
-    // Add the CSS animation class
     hintTile.classList.add(animClass);
 
-    // Clean up after the animation completes (1 second)
     setTimeout(() => {
       if(hintTile.contains(arrow)) hintTile.removeChild(arrow);
       hintTile.classList.remove(animClass);
