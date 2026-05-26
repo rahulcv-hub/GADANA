@@ -455,7 +455,45 @@
       font-style: italic;
       color: var(--color-text-secondary);
       font-size: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
+    }
+
+    .win-stars {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .win-star {
+      font-size: 26px;
+      line-height: 1;
+      opacity: 0;
+      transform: scale(0.4) rotate(-20deg);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .win-star.lit {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+
+    .win-star.dim {
+      opacity: 0.2;
+      transform: scale(1) rotate(0deg);
+    }
+
+    .win-efficiency {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-tertiary);
+      margin-bottom: 16px;
+    }
+
+    [data-theme="dark"] .win-efficiency {
+      color: var(--color-text-tertiary);
     }
     #animationCanvas {
       position: absolute;
@@ -590,6 +628,12 @@
         <div class="win-box">
           <div class="win-title" id="winHeader">Solved!</div>
           <div class="win-sub" id="winStats"></div>
+          <div class="win-stars" id="winStars">
+            <span class="win-star" id="winStar0">★</span>
+            <span class="win-star" id="winStar1">★</span>
+            <span class="win-star" id="winStar2">★</span>
+          </div>
+          <div class="win-efficiency" id="winEfficiency"></div>
           <button class="btn primary" id="winActionButton" onclick="triggerLevelTransition()">Next Level</button>
         </div>
       </div>
@@ -688,6 +732,30 @@ const localizations = {
     
     winCommentEasy: "You actually did it! I was starting to lose hope. 🎉",
     winCommentMedium: "Your effort paid off wonderfully! 🌟",
+
+    efficiencyLabel: "Move efficiency",
+
+    stars3Comments: [
+      "Are you a robot? That was unnervingly perfect. 🤖",
+      "Okay, I take everything back. You are genuinely brilliant. 🧠",
+      "Chef's kiss. I might frame this solve. 💅",
+      "NASA called. They want you for the mission. 🚀",
+      "That was so clean it made me uncomfortable. ✨"
+    ],
+    stars2Comments: [
+      "Solid! A few extra moves but your dignity is intact. 😌",
+      "Not bad at all! A little wandering, but you got there. 🗺️",
+      "Two stars! The third one ran away but you were close. 🌟",
+      "Respectable. Your future self would approve. 👍",
+      "Good solve! You took the scenic route but hey, the view was nice. 🌄"
+    ],
+    stars1Comments: [
+      "One star. But hey, you finished! That counts for something. 🥲",
+      "A winner is you! ...Eventually. 🏆",
+      "You solved it through sheer persistence. Respect. 💪",
+      "The puzzle is done. The therapist bill is optional. 😅",
+      "One star, infinite character-building. That's growth! 🌱"
+    ],
     winCommentHard: "An elite display of puzzle-solving mastery! 🏆",
 
     nextLevel: "Next Level", restartJourney: "Restart Journey", langBtn: "മലയാളം",
@@ -738,6 +806,30 @@ const localizations = {
     
     winCommentEasy: "സമ്മതിച്ചു! നീ ഇത് തീർക്കുമെന്ന് ഞാൻ കരുതിയില്ല. 🎉",
     winCommentMedium: "ഗംഭീരമായ പ്രകടനം! 🌟",
+
+    efficiencyLabel: "നീക്ക കാര്യക്ഷമത",
+
+    stars3Comments: [
+      "റോബോട്ടാണോ? ഇത്ര കൃത്യമായി ആരും ചെയ്യില്ല! 🤖",
+      "ഞാൻ തെറ്റ് പറഞ്ഞു, നീ ശരിക്കും ഒരു പ്രതിഭയാണ്! 🧠",
+      "പൊള്ളും! ഞാൻ ഇത് ഫ്രെയിം ചെയ്ത് വയ്ക്കും. 💅",
+      "ഇസ്രോ വിളിച്ചിട്ടുണ്ട്, പോകൂ! 🚀",
+      "ഇത്ര ക്ലീനായി ചെയ്തത് എനിക്ക് അസ്വസ്ഥതയുണ്ടാക്കി. ✨"
+    ],
+    stars2Comments: [
+      "നല്ലത്! കുറച്ച് അധിക നീക്കങ്ങൾ ഉണ്ടായിരുന്നു, പക്ഷേ മാനം രക്ഷപ്പെട്ടു. 😌",
+      "മോശമില്ല! കുറച്ച് അലഞ്ഞു, പക്ഷേ ലക്ഷ്യത്തിലെത്തി. 🗺️",
+      "രണ്ട് നക്ഷത്രം! മൂന്നാമത്തേത് ഓടിപ്പോയി, പക്ഷേ അടുത്തെത്തി. 🌟",
+      "മാന്യമായ പ്രകടനം! ഭാവിയിലെ നിന്നെ ഇത് കണ്ട് സന്തോഷിക്കും. 👍",
+      "നല്ല സോൾവ്! കുറച്ച് ദൂരം കൂടി പോയി, പക്ഷേ കാഴ്ച നന്നായിരുന്നു. 🌄"
+    ],
+    stars1Comments: [
+      "ഒരു നക്ഷത്രം. പക്ഷേ തീർത്തു! അതു മതി. 🥲",
+      "വിജയി നീ തന്നെ! ...ഒടുവിൽ. 🏆",
+      "ശുദ്ധമായ നിശ്ചയദാർഢ്യം കൊണ്ട് ജയിച്ചു. ആദരവ്. 💪",
+      "പസിൽ തീർന്നു. ഇനി ഒന്ന് ശ്വസിക്കൂ. 😅",
+      "ഒരു നക്ഷത്രം, അനന്തമായ ആത്മവിശ്വാസം. ഇതാണ് വളർച്ച! 🌱"
+    ],
     winCommentHard: "അതിഗംഭീരമായ ഒരു നേട്ടം! 🏆",
 
     nextLevel: "അടുത്ത ഘട്ടം", restartJourney: "ആദ്യമുതൽ തുടങ്ങുക", langBtn: "English",
@@ -800,15 +892,15 @@ function toggleLanguage() {
 
   if (isGameWon) {
     const actionBtn = document.getElementById('winActionButton');
-    
-    if (difficulty === 'hard') {
-      document.getElementById('winHeader').textContent = pack.winHeaderHard;
-    } else if (difficulty === 'medium') {
-      document.getElementById('winHeader').textContent = pack.winHeaderMedium;
-    } else {
-      document.getElementById('winHeader').textContent = pack.winHeaderEasy;
-    }
-
+    const eff = computeEfficiency(moves, difficulty);
+    const stars = computeStars(eff, seconds, difficulty);
+    let header;
+    if (stars === 3) header = pack.winHeaderHard;
+    else if (stars === 2) header = pack.winHeaderMedium;
+    else header = pack.winHeaderEasy;
+    document.getElementById('winHeader').textContent = header;
+    document.getElementById('winEfficiency').textContent =
+      `${pack.efficiencyLabel}: ${eff}%`;
     actionBtn.textContent = currentLevelIndex < gameLevels.length - 1 ? pack.nextLevel : pack.restartJourney;
   } else {
     document.getElementById('hintText').textContent = pack.startComment;
@@ -943,6 +1035,43 @@ function moveTile(pos) {
 
 function checkWin() { return tiles.every((v, i) => v === i); }
 
+// Optimal move baselines per difficulty (generous but meaningful)
+const optimalMovesBase = { easy: 30, medium: 80, hard: 200 };
+
+function computeEfficiency(actualMoves, difficulty) {
+  const base = optimalMovesBase[difficulty];
+  // efficiency = base / actual, capped at 100%
+  return Math.min(100, Math.round((base / actualMoves) * 100));
+}
+
+function computeStars(efficiency, seconds, difficulty) {
+  // Time thresholds per difficulty
+  const timeLimits = { easy: [60, 120], medium: [180, 360], hard: [480, 900] };
+  const [fast, medium] = timeLimits[difficulty];
+  let stars = 0;
+  if (efficiency >= 80) stars = 3;
+  else if (efficiency >= 55) stars = 2;
+  else stars = 1;
+  // Dock a star if time was really slow (but never below 1)
+  if (seconds > medium && stars > 1) stars--;
+  return stars;
+}
+
+function animateStars(starCount) {
+  for (let i = 0; i < 3; i++) {
+    const el = document.getElementById('winStar' + i);
+    el.classList.remove('lit', 'dim');
+    // reset
+    void el.offsetWidth;
+  }
+  for (let i = 0; i < 3; i++) {
+    const el = document.getElementById('winStar' + i);
+    setTimeout(() => {
+      el.classList.add(i < starCount ? 'lit' : 'dim');
+    }, 200 + i * 180);
+  }
+}
+
 function handleWin() {
   clearInterval(timerInterval); timerStarted = false; isGameWon = true;
   if (idleTimeout) clearTimeout(idleTimeout);
@@ -952,24 +1081,38 @@ function handleWin() {
   if (!bestMoves[recordKey] || moves < bestMoves[recordKey]) bestMoves[recordKey] = moves;
   updateBestScoreDisplay();
   document.getElementById('winStats').textContent = `${moves} moves · ${document.getElementById('timer').textContent}`;
-  
+
+  const efficiency = computeEfficiency(moves, difficulty);
+  const starCount = computeStars(efficiency, seconds, difficulty);
+
+  document.getElementById('winEfficiency').textContent =
+    `${localizations[currentLang].efficiencyLabel}: ${efficiency}%`;
+
   const actionBtn = document.getElementById('winActionButton');
   const pack = localizations[currentLang];
-  
-  if (difficulty === 'hard') {
-    document.getElementById('winHeader').textContent = pack.winHeaderHard;
-    showDynamicComment(pack.winCommentHard, false);
-  } else if (difficulty === 'medium') {
-    document.getElementById('winHeader').textContent = pack.winHeaderMedium;
-    showDynamicComment(pack.winCommentMedium, false);
+
+  // Pick header and comment based on star rating (overrides old difficulty-only logic)
+  let header, commentBank;
+  if (starCount === 3) {
+    header = pack.winHeaderHard; // reuse the "epic" header
+    commentBank = pack.stars3Comments;
+  } else if (starCount === 2) {
+    header = pack.winHeaderMedium;
+    commentBank = pack.stars2Comments;
   } else {
-    document.getElementById('winHeader').textContent = pack.winHeaderEasy;
-    showDynamicComment(pack.winCommentEasy, false);
+    header = pack.winHeaderEasy;
+    commentBank = pack.stars1Comments;
   }
-  
+  document.getElementById('winHeader').textContent = header;
+  showDynamicComment(commentBank[Math.floor(Math.random() * commentBank.length)], false);
+
   actionBtn.textContent = currentLevelIndex < gameLevels.length - 1 ? pack.nextLevel : pack.restartJourney;
   renderBoard();
-  setTimeout(() => { document.getElementById('winOverlay').classList.add('show'); startCelebration(); }, 2600);
+  setTimeout(() => {
+    document.getElementById('winOverlay').classList.add('show');
+    startCelebration();
+    animateStars(starCount);
+  }, 2600);
 }
 
 function triggerLevelTransition() {
