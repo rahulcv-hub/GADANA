@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fragmenta - Sliding Puzzle</title>
+  <title>GADANA - Sliding Puzzle</title>
   <style>
-    /* Imported Manjari font along with the existing ones */
-    @import url('https://fonts.googleapis.com/css2?family=Gayathri:wght@400;700&family=Manjari:wght@700&family=Playfair+Display:wght@400;700;900&family=Crimson+Text:ital@0;1&display=swap');
+    /* Imported Albert Sans and Manjari along with the existing fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;700&family=Gayathri:wght@400;700&family=Manjari:wght@700&family=Playfair+Display:wght@400;700;900&family=Crimson+Text:ital@0;1&display=swap');
 
     /* CUSTOM FONT DEFINITION */
     @font-face {
@@ -128,9 +128,9 @@
     }
     
     .game-title {
-      font-family: 'ML_TT_Chithira', 'Playfair Display', Georgia, serif;
-      font-size: 32px;
+      font-family: 'Albert Sans', sans-serif;
       font-weight: 700;
+      font-size: 32px;
       letter-spacing: 0.05em;
       margin: 0 0 2px;
       color: var(--color-text-primary);
@@ -510,7 +510,7 @@
   </div>
 
   <h1 class="sr-only" id="srInstruction">Sliding puzzle game with illustrated tiles. Arrange tiles to complete the illustration.</h1>
-  <p class="game-title" id="mainTitle">Fragmenta</p>
+  <p class="game-title" id="mainTitle">GADANA</p>
   <p class="game-subtitle" id="mainSubtitle">Reassemble the shattered illustration</p>
   <p class="level-indicator" id="levelIndicator">Level 1: The Village Square</p>
 
@@ -619,7 +619,7 @@ const gameLevels = [
 
 const localizations = {
   en: {
-    title: "Fragmenta",
+    title: "GADANA",
     subtitle: "Reassemble the shattered illustration",
     srInstruction: "Sliding puzzle game with illustrated tiles. Arrange tiles to complete the illustration.",
     easy: "Easy", medium: "Medium", hard: "Hard", reset: "Reset", hint: "Hint", themeTip: "Switch View Mode",
@@ -736,7 +736,6 @@ function toggleLanguage() {
   document.getElementById('themeToggle').setAttribute('title', pack.themeTip);
   document.getElementById('levelIndicator').textContent = gameLevels[currentLevelIndex].names[currentLang];
   
-  // Conditionally toggle class to hook up Manjari Bold typography
   if (currentLang === 'ml') {
     titleEl.classList.add('lang-ml');
   } else {
