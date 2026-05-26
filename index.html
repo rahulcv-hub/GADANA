@@ -488,6 +488,36 @@
     }
     .hint-text.visible { opacity: 1; }
     
+    .hint-pips {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .hint-pip {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-text-primary);
+      transition: background 0.25s ease, transform 0.25s ease;
+    }
+
+    .hint-pip.used {
+      background: var(--color-border-secondary);
+      transform: scale(0.7);
+    }
+
+    [data-theme="dark"] .hint-pip { background: var(--color-text-tertiary); }
+    [data-theme="dark"] .hint-pip.used { background: #3a3a3a; transform: scale(0.7); }
+
+    .btn.hint-exhausted {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    
     .sr-only {
       position: absolute;
       width: 1px;
@@ -553,6 +583,12 @@
     <button class="btn" id="resetBtn" onclick="newGame()">Reset</button>
     <button class="btn" id="hintBtn" onclick="showHint()">Hint</button>
   </div>
+  <div class="hint-pips" id="hintPips">
+    <div class="hint-pip" id="hintPip0"></div>
+    <div class="hint-pip" id="hintPip1"></div>
+    <div class="hint-pip" id="hintPip2"></div>
+    <div class="hint-pip" id="hintPip3"></div>
+  </div>
   <p class="hint-text" id="hintText">Click tiles adjacent to the empty space to slide them.</p>
 </div>
 
@@ -609,6 +645,7 @@ let currentLang = 'en';
 
 let lastMovedTileValue = -1; 
 let currentLevelIndex = 0;
+let hintsRemaining = 4;
 
 const gameLevels = [
   { names: { en: "Level 1: The Village Square", ml: "ഘട്ടം 1: ഗ്രാമത്തിലെ കവല" }, lineart: "Gemini_Generated_Image_hebcjshebcjshebc (1).png", shaded: "Gemini_Generated_Image_f38jokf38jokf38j.png" },
@@ -625,6 +662,7 @@ const localizations = {
     easy: "Easy", medium: "Medium", hard: "Hard", reset: "Reset", hint: "Hint", themeTip: "Switch View Mode",
     startComment: "Go ahead. The puzzle isn't going to solve itself.",
     hintComment: "Follow the arrow. Don't let me down.",
+    hintExhausted: "No hints left. You're on your own now. 🫡",
     
     /* Updated Difficulty-Based Winning Text */
     winHeaderEasy: "Finally!", 
@@ -674,6 +712,7 @@ const localizations = {
     easy: "എളുപ്പം", medium: "ഇടത്തരം", hard: "കഠിനം", reset: "വീണ്ടും തുടങ്ങുക", hint: "സഹായം വേണോ?", themeTip: "തീം മാറ്റുക",
     startComment: "തുടങ്ങിക്കോ. നോക്കി നിന്നാൽ ഇത് തീരില്ല.",
     hintComment: "അമ്പ് കാണിക്കുന്ന വഴിയിലേക്ക് നീക്കുക.",
+    hintExhausted: "സഹായം തീർന്നു. ഇനി സ്വന്തം ബുദ്ധി മതി. 🫡",
     
     /* Updated Difficulty-Based Winning Text */
     winHeaderEasy: "ഒടുവിൽ കഴിഞ്ഞു!", 
@@ -996,6 +1035,7 @@ function newGame() {
   const hintEl = document.getElementById('hintText'); hintEl.classList.remove('visible');
   hintEl.textContent = localizations[currentLang].startComment; hintEl.classList.add('visible');
   
+  hintsRemaining = 4; updateHintUI();
   const shuffleMoves = difficulty === 'easy' ? 40 : difficulty === 'medium' ? 120 : 300;
   initTiles(); shuffle(tiles, shuffleMoves); renderBoard(); updateBestScoreDisplay(); resetIdleTimer();
 }
@@ -1026,48 +1066,133 @@ function renderBoard() {
   });
 }
 
-function showHint() {
-  if (isGameWon) return;
-  const empty = getEmptyPos(); 
-  const neighbors = getNeighbors(empty);
-  let bestNeighbor = neighbors[0], bestScore = Infinity;
-  
-  neighbors.forEach(n => {
-    const tileVal = tiles[n];
-    const dist = Math.abs(Math.floor(n / SIZE) - Math.floor(tileVal / SIZE)) + Math.abs((n % SIZE) - (tileVal % SIZE));
-    if (dist < bestScore) { bestScore = dist; bestNeighbor = n; }
+// Manhattan distance heuristic for entire board state
+function hintHeuristic(state, size) {
+  let score = 0;
+  const total = size * size;
+  for (let i = 0; i < total; i++) {
+    const val = state[i];
+    if (val === total - 1) continue; // skip blank tile
+    score += Math.abs(Math.floor(i / size) - Math.floor(val / size))
+           + Math.abs((i % size) - (val % size));
+  }
+  return score;
+}
+
+// Beam search: explore the puzzle space with a wide beam, track the best
+// path seen so far. Returns an array of {tilePos, emptyPos} for up to 3 moves.
+function getNextHintMoves() {
+  const MOVES_WANTED = 3;
+  const BEAM_WIDTH = 80;      // candidates kept per depth level
+  const MAX_DEPTH = 25;       // look this many moves ahead to find a good direction
+
+  const startEmpty = tiles.indexOf(TILE_COUNT - 1);
+
+  // node = { state: Int8Array, emptyPos, path: [{tilePos,emptyPos}], h }
+  const makeNode = (state, emptyPos, path) => ({
+    state,
+    emptyPos,
+    path,
+    h: hintHeuristic(state, SIZE)
   });
 
-  const hintTile = document.getElementById('board').querySelectorAll('.tile')[bestNeighbor];
-  
-  if (hintTile) {
-    let arrowChar = '';
-    let animClass = '';
-    
-    if (bestNeighbor === empty - 1) { 
-      arrowChar = '▶'; animClass = 'ghost-move-right'; 
-    } else if (bestNeighbor === empty + 1) { 
-      arrowChar = '◀'; animClass = 'ghost-move-left'; 
-    } else if (bestNeighbor === empty - SIZE) { 
-      arrowChar = '▼'; animClass = 'ghost-move-down'; 
-    } else if (bestNeighbor === empty + SIZE) { 
-      arrowChar = '▲'; animClass = 'ghost-move-up'; 
+  let beam = [makeNode(new Int8Array(tiles), startEmpty, [])];
+  const visited = new Set([tiles.join(',')]);
+
+  let bestNode = beam[0]; // track the node with lowest h seen
+
+  for (let depth = 0; depth < MAX_DEPTH; depth++) {
+    const nextCandidates = [];
+
+    for (const node of beam) {
+      const nbrs = getNeighbors(node.emptyPos);
+      for (const n of nbrs) {
+        const newState = node.state.slice();
+        newState[node.emptyPos] = newState[n];
+        newState[n] = TILE_COUNT - 1;
+
+        const key = Array.from(newState).join(',');
+        if (visited.has(key)) continue;
+        visited.add(key);
+
+        const newPath = [...node.path, { tilePos: n, emptyPos: node.emptyPos }];
+        const child = makeNode(newState, n, newPath);
+        nextCandidates.push(child);
+
+        if (child.h < bestNode.h) bestNode = child;
+        if (child.h === 0) {
+          // Solved! Return first 3 steps
+          return child.path.slice(0, MOVES_WANTED);
+        }
+      }
     }
 
-    const arrow = document.createElement('div');
-    arrow.className = 'hint-arrow';
-    arrow.textContent = arrowChar;
-    hintTile.appendChild(arrow);
-    
-    hintTile.classList.add(animClass);
+    if (nextCandidates.length === 0) break;
 
-    setTimeout(() => {
-      if(hintTile.contains(arrow)) hintTile.removeChild(arrow);
-      hintTile.classList.remove(animClass);
-    }, 1000);
+    // Keep the BEAM_WIDTH best candidates by heuristic
+    nextCandidates.sort((a, b) => a.h - b.h);
+    beam = nextCandidates.slice(0, BEAM_WIDTH);
   }
-  
-  showDynamicComment(localizations[currentLang].hintComment, true); 
+
+  // Return the first MOVES_WANTED steps from the best path found
+  return bestNode.path.slice(0, MOVES_WANTED);
+}
+
+function updateHintUI() {
+  const btn = document.getElementById('hintBtn');
+  for (let i = 0; i < 4; i++) {
+    const pip = document.getElementById('hintPip' + i);
+    if (pip) pip.classList.toggle('used', i >= hintsRemaining);
+  }
+  if (hintsRemaining === 0) {
+    btn.classList.add('hint-exhausted');
+  } else {
+    btn.classList.remove('hint-exhausted');
+  }
+}
+
+function showHint() {
+  if (isGameWon) return;
+
+  if (hintsRemaining <= 0) {
+    showDynamicComment(localizations[currentLang].hintExhausted, true);
+    return;
+  }
+
+  const moves = getNextHintMoves();
+  if (!moves || moves.length === 0) return;
+
+  hintsRemaining--;
+  updateHintUI();
+
+  // Animate each move sequentially, staggered 1.1s apart
+  moves.forEach(({ tilePos, emptyPos }, idx) => {
+    setTimeout(() => {
+      const boardTiles = document.getElementById('board').querySelectorAll('.tile');
+      const hintTile = boardTiles[tilePos];
+      if (!hintTile) return;
+
+      // Direction: the tile at tilePos slides into emptyPos
+      let arrowChar = '', animClass = '';
+      if (tilePos === emptyPos - 1)      { arrowChar = '▶'; animClass = 'ghost-move-right'; }
+      else if (tilePos === emptyPos + 1) { arrowChar = '◀'; animClass = 'ghost-move-left'; }
+      else if (tilePos === emptyPos - SIZE) { arrowChar = '▼'; animClass = 'ghost-move-down'; }
+      else if (tilePos === emptyPos + SIZE) { arrowChar = '▲'; animClass = 'ghost-move-up'; }
+
+      const arrow = document.createElement('div');
+      arrow.className = 'hint-arrow';
+      arrow.textContent = arrowChar;
+      hintTile.appendChild(arrow);
+      hintTile.classList.add(animClass);
+
+      setTimeout(() => {
+        if (hintTile.contains(arrow)) hintTile.removeChild(arrow);
+        hintTile.classList.remove(animClass);
+      }, 950);
+    }, idx * 1100);
+  });
+
+  showDynamicComment(localizations[currentLang].hintComment, true);
   resetIdleTimer();
 }
 
